@@ -93,3 +93,15 @@ begin
       'create policy "own rows" on %I for all using (user_id = auth.uid()) with check (user_id = auth.uid())', t);
   end loop;
 end $$;
+
+-- Per-user preferences (name, currency, monthly budget).
+create table if not exists settings (
+  user_id uuid primary key default auth.uid() references auth.users on delete cascade,
+  name text not null default '',
+  currency text not null default 'USD',
+  monthly_budget numeric not null default 0
+);
+
+alter table settings enable row level security;
+drop policy if exists "own rows" on settings;
+create policy "own rows" on settings for all using (user_id = auth.uid()) with check (user_id = auth.uid());

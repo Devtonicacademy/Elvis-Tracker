@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { Menu, Plus, Search } from 'lucide-react'
+import { CloudOff, Menu, Plus, Search, X } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
 import { CommandPalette } from '@/components/CommandPalette'
 import { HelpModal } from '@/components/HelpModal'
@@ -13,7 +13,7 @@ import { Sidebar } from './Sidebar'
 
 export function Layout() {
   useShortcuts()
-  const { sidebarOpen, setSidebar, setPalette, openQuick } = useUI()
+  const { sidebarOpen, setSidebar, setPalette, openQuick, syncError, setSyncError } = useUI()
   const mac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
 
   return (
@@ -71,6 +71,16 @@ export function Layout() {
       >
         <Plus className="h-6 w-6" />
       </button>
+
+      {syncError && (
+        <div role="alert" className="animate-fade-in fixed bottom-24 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center gap-3 rounded-xl border border-red-500/40 bg-surface px-4 py-3 text-sm shadow-2xl">
+          <CloudOff className="h-4 w-4 shrink-0 text-red-500" />
+          <span className="flex-1">{syncError}</span>
+          <button onClick={() => setSyncError(null)} className="cursor-pointer text-muted hover:text-fg" aria-label="Dismiss">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <CommandPalette />
       <QuickAdd />

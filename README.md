@@ -49,10 +49,22 @@ By default, everything is saved in your browser (localStorage). Use **Settings �
 
 ### Cloud sync with Supabase (optional)
 
-1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL editor, run [`supabase/schema.sql`](supabase/schema.sql).
-3. Copy `.env.example` to `.env.local` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Project Settings → API).
-4. Restart `npm run dev`. You'll be asked to sign in with a magic link. On first sign-in, your local data is uploaded.
+Once the Supabase keys are set, the app requires sign-in (Google, or an email link). Each account's data is private, enforced by row-level security. New accounts start empty.
+
+1. **Create a project** at [supabase.com](https://supabase.com) and wait for it to finish provisioning.
+2. **Create the tables**: go to SQL Editor → New query, paste [`supabase/schema.sql`](supabase/schema.sql), and click Run.
+3. **Set the auth URLs**: go to Authentication → URL Configuration.
+   - Site URL: your Vercel URL, e.g. `https://elvis-tracker.vercel.app`
+   - Redirect URLs: add the same URL, plus `http://localhost:5173` for local dev
+4. **Turn on Google sign-in**:
+   1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials): Create credentials → OAuth client ID → Web application.
+   2. Under Authorized redirect URIs, add `https://<your-project-ref>.supabase.co/auth/v1/callback`. Supabase shows this callback URL on its Google provider page.
+   3. In Supabase, go to Authentication → Sign In / Providers → Google. Enable it and paste the Client ID and Client Secret.
+5. **Add the keys**: copy the Project URL and the anon/publishable key from Project Settings → API.
+   - Vercel: Settings → Environment Variables → add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, then redeploy.
+   - Local dev: put the same two values in `.env.local`.
+
+The anon key is safe to expose in the browser; row-level security is what protects the data.
 
 ## Deploy to Vercel
 

@@ -1,5 +1,5 @@
 import { Cloud, Database, Download, Keyboard, RotateCcw, Trash2, Upload } from 'lucide-react'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button, Field, Input, PageHeader, Select } from '@/components/ui'
 import { supabase } from '@/data/supabase'
 import { useData } from '@/store/data'
@@ -11,6 +11,10 @@ export function SettingsPage() {
   const { settings, setSettings, resetDemo, clearAll, replaceAll } = useData()
   const setHelp = useUI((s) => s.setHelp)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [email, setEmail] = useState<string | null>(null)
+  useEffect(() => {
+    supabase?.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null))
+  }, [])
 
   const exportJson = () => {
     const { tasks, projects, apps, expenses, habits, reflections, settings } = useData.getState()
@@ -70,7 +74,7 @@ export function SettingsPage() {
           </h2>
           <p className="mb-4 text-sm text-muted">
             {supabase
-              ? 'Your data syncs to Supabase and is available on every device you sign in on.'
+              ? `Signed in${email ? ` as ${email}` : ''}. Your data syncs to the cloud and is available on every device you sign in on.`
               : 'Data is saved in this browser. Add Supabase keys to sync across devices (see README).'}
           </p>
           <div className="flex flex-wrap gap-2">

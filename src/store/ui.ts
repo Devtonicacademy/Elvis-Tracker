@@ -8,12 +8,14 @@ interface UIState {
   taskId: string | null
   sidebarOpen: boolean
   helpOpen: boolean
+  syncError: string | null
   setPalette(open: boolean): void
   openQuick(kind: QuickKind, defaults?: Record<string, unknown>, editId?: string): void
   closeQuick(): void
   openTask(id: string | null): void
   setSidebar(open: boolean): void
   setHelp(open: boolean): void
+  setSyncError(message: string | null): void
 }
 
 export const useUI = create<UIState>()((set) => ({
@@ -22,12 +24,14 @@ export const useUI = create<UIState>()((set) => ({
   taskId: null,
   sidebarOpen: false,
   helpOpen: false,
+  syncError: null,
   setPalette: (paletteOpen) => set({ paletteOpen }),
   openQuick: (kind, defaults, editId) => set({ quick: { kind, defaults, editId }, paletteOpen: false }),
   closeQuick: () => set({ quick: null }),
   openTask: (taskId) => set({ taskId }),
   setSidebar: (sidebarOpen) => set({ sidebarOpen }),
   setHelp: (helpOpen) => set({ helpOpen }),
+  setSyncError: (syncError) => set({ syncError }),
 }))
 
 export function toggleTheme() {
