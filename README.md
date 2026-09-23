@@ -54,6 +54,13 @@ By default, everything is saved in your browser (localStorage). Use **Settings �
 3. Copy `.env.example` to `.env.local` and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (Project Settings → API).
 4. Restart `npm run dev`. You'll be asked to sign in with a magic link. On first sign-in, your local data is uploaded.
 
+## Deploy to Vercel
+
+1. On [vercel.com](https://vercel.com): **Add New → Project**, then import this GitHub repo.
+2. Vercel detects Vite automatically. The build settings live in `vercel.json`, which also rewrites deep links such as `/budget` to the app.
+3. (Optional) To use cloud sync, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` under **Settings → Environment Variables**. Without them, the app stores data in each visitor's browser.
+4. Click **Deploy**. Every push to `main` redeploys, and pull requests get preview URLs.
+
 ## Tech
 
 Vite, React 19, TypeScript, Tailwind CSS v4, Zustand, dnd-kit, Recharts, cmdk, date-fns, lucide icons, and Supabase (optional).
