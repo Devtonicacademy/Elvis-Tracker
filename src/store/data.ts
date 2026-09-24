@@ -1,11 +1,9 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { localRepository, type Repository } from '@/data/repository'
+import { localRepository, type Repository, type Tables } from '@/data/repository'
 import { buildSeed } from '@/data/seed'
 import type { CollectionName, Collections, Settings, Task, TaskStatus } from '@/data/types'
 import { todayISO, uid } from '@/lib/utils'
-
-type Tables = { [K in CollectionName]: Collections[K][] }
 
 interface DataState extends Tables {
   settings: Settings
@@ -18,6 +16,8 @@ interface DataState extends Tables {
   toggleHabit(id: string, date?: string): void
   setSettings(changes: Partial<Settings>): void
   replaceAll(tables: Tables): void
+  /** Swap in data loaded from (or for) a signed-in account without writing it back. */
+  hydrate(tables: Tables, settings?: Partial<Settings>): void
   resetDemo(): void
   clearAll(): void
 }
@@ -38,7 +38,9 @@ function mirror(prev: Tables, next: Tables) {
   }
 }
 
-const empty: Tables = { tasks: [], projects: [], apps: [], expenses: [], habits: [], reflections: [] }
+export const defaultSettings: Settings = { currency: 'USD', monthlyBudget: 3000, name: 'Elvis' }
+
+export const emptyTables: Tables = { tasks: [], projects: [], apps: [], expenses: [], habits: [], reflections: [] }
 
 export const useData = create<DataState>()(
   persist(
@@ -50,7 +52,7 @@ export const useData = create<DataState>()(
 
       return {
         ...buildSeed(),
-        settings: { currency: 'USD', monthlyBudget: 3000, name: 'Elvis' },
+        settings: defaultSettings,
 
         create(collection, row) {
           const full = { createdAt: new Date().toISOString(), ...row, id: row.id ?? uid() } as never
@@ -130,7 +132,13 @@ export const useData = create<DataState>()(
         },
 
         setSettings(changes) {
-          set({ settings: { ...get().settings, ...changes } })
+          const settings = { ...get().settings, ...changes }
+          set({ settings })
+          void repo.saveSettings(settings)
+        },
+
+        hydrate(tables, settings) {
+          set({ ...tables, settings: { ...defaultSettings, ...settings } })
         },
 
         replaceAll(tables) {
@@ -144,7 +152,7 @@ export const useData = create<DataState>()(
         },
 
         clearAll() {
-          get().replaceAll(empty)
+          get().replaceAll(emptyTables)
         },
       }
     },

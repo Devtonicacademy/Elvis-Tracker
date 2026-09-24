@@ -83,13 +83,22 @@ create table if not exists reflections (
   primary key (user_id, id)
 );
 
+-- Per-user preferences (name, currency, monthly budget).
+create table if not exists settings (
+  user_id uuid primary key default auth.uid() references auth.users on delete cascade,
+  name text not null default '',
+  currency text not null default 'USD',
+  monthly_budget numeric not null default 0
+);
+
+-- (select auth.uid()) is evaluated once per query instead of once per row.
 do $$
 declare t text;
 begin
-  foreach t in array array['projects', 'tasks', 'apps', 'expenses', 'habits', 'reflections'] loop
+  foreach t in array array['projects', 'tasks', 'apps', 'expenses', 'habits', 'reflections', 'settings'] loop
     execute format('alter table %I enable row level security', t);
     execute format('drop policy if exists "own rows" on %I', t);
     execute format(
-      'create policy "own rows" on %I for all using (user_id = auth.uid()) with check (user_id = auth.uid())', t);
+      'create policy "own rows" on %I for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()))', t);
   end loop;
 end $$;
